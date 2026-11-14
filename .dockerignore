@@ -1,0 +1,9 @@
+.git/
+backend/.venv/
+backend/__pycache__/
+agent/.venv/
+agent/__pycache__/
+frontend/node_modules/
+frontend/dist/
+.env
+pgdata/

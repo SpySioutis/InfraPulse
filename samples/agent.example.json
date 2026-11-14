@@ -1,0 +1,5 @@
+{
+  "server_url": "http://central-host:8003",
+  "registration_token": "PASTE_SINGLE_USE_TOKEN_HERE",
+  "interval_seconds": 60
+}

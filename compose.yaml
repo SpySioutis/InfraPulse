@@ -1,0 +1,67 @@
+name: infrapulse
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-infrapulse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-infrapulse}
+      POSTGRES_DB: ${POSTGRES_DB:-infrapulse}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-infrapulse} -d ${POSTGRES_DB:-infrapulse}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - infrapulse-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-infrapulse}:${POSTGRES_PASSWORD:-infrapulse}@db:5432/${POSTGRES_DB:-infrapulse}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:?ADMIN_USERNAME must be set in .env (see .env.example)}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set in .env (see .env.example)}
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string}
+      JWT_EXPIRY_MINUTES: ${JWT_EXPIRY_MINUTES:-720}
+      METRIC_RETENTION_DAYS: ${METRIC_RETENTION_DAYS:-30}
+      HEARTBEAT_GRACE_SECONDS: ${HEARTBEAT_GRACE_SECONDS:-180}
+    ports:
+      - "${BACKEND_PORT:-8003}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - infrapulse-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8092}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - infrapulse-net
+
+volumes:
+  pgdata:
+
+networks:
+  infrapulse-net:
+    driver: bridge
