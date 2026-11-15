@@ -136,6 +136,8 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { api, toParams, type Server, type ServerGroup, type ServerPage } from '../api/client'
+
+const route = useRoute()
 import { formatNumber } from '../utils/format'
 import { healthClass, healthDot } from '../utils/health'
 import EmptyState from '../components/EmptyState.vue'
@@ -256,8 +258,12 @@ async function remove(srv: Server) {
 }
 
 onMounted(async () => {
-  await loadGroups()
-  const groupId = useRoute().query.group_id
+  try {
+    await loadGroups()
+  } catch {
+    error.value = 'Could not load server groups.'
+  }
+  const groupId = route.query.group_id
   if (typeof groupId === 'string' && groupId) query.group_id = groupId
   await reload()
 })

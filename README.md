@@ -16,7 +16,7 @@ start.bat              # Windows
 Then open [http://localhost:8092](http://localhost:8092) in a browser.
 API docs: [http://localhost:8003/api/docs](http://localhost:8003/api/docs).
 
-See [MANUAL.md](MANUAL.md) for installation, agent setup (systemd included), configuration, testing and troubleshooting.
+See [MANUAL.md](MANUAL.md) for installation, agent setup (systemd included), configuration, testing and troubleshooting — or the printable **[InfraPulse User Manual (PDF)](docs/InfraPulse-Manual.pdf)** with annotated screenshots.
 
 ## Screenshots
 
